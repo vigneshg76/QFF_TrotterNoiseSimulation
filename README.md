@@ -46,4 +46,4 @@ The topology difference shows up most clearly on the periodic boundary. With the
 The full CSV outputs are stored in `results/tables/`, and the exact software environment is recorded in `results/environment.json`.
 
 ## AI assistance disclosure
-_EDIT TO MATCH WHAT YOU ACTUALLY DID, following the organizers' AI policy._ Example: "Initial code scaffolding and documentation templates were drafted with Claude (Anthropic). The team reviewed, ran and verified all code and wrote the interpretation."
+Initial scaffolding for the report and documentation was drafted with GitHub Copilot. The team then reviewed the saved benchmark tables and figures, checked the numerical values against the generated CSV outputs, and finalized the interpretation and conclusions in this report.
