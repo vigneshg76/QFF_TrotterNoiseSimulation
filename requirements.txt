@@ -1,0 +1,12 @@
+# Versions are intentionally unpinned here because they could not be verified for this repo.
+# BEFORE SUBMITTING: run `pip freeze | grep -i -E "qiskit|numpy|scipy|pandas|matplotlib|networkx|pylatexenc"`
+# and replace this file with the exact versions you ran (results/environment.json also records them).
+qiskit>=1.0
+qiskit-aer>=0.14
+numpy
+scipy
+pandas
+matplotlib
+networkx
+pylatexenc
+jupyter

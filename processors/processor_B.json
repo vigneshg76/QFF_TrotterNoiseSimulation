@@ -1,0 +1,12 @@
+{
+  "name": "processor_B",
+  "num_qubits": 9,
+  "coupling_map": [[0, 1], [1, 2], [1, 6], [2, 3], [2, 6], [2, 5], [3, 4], [4, 5], [5, 6], [6, 7], [6, 8], [8, 0]],
+  "basis_gates": ["rz", "sx", "x", "cx"],
+  "ports": null,
+  "noise": {
+    "type": "assumption",
+    "source": "NOT official - organizers have not published final noise values. See src/config.py"
+  },
+  "notes": "Edges transcribed from the organizers' 'Processor A/B Benchmark Configuration' document (undirected; both directions are used). VERIFY against the processor image in the official Drive folder."
+}

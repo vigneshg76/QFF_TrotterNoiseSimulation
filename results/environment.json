@@ -1,0 +1,50 @@
+{
+  "versions": {
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "qiskit": "2.5.2",
+    "qiskit_aer": "0.17.2",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pandas": "3.0.6",
+    "matplotlib": "3.11.2"
+  },
+  "config": {
+    "n_spins": 4,
+    "J": 1.0,
+    "g": 1.0,
+    "t_final": 2.0,
+    "trotter_steps": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "boundaries": [
+      "open",
+      "periodic"
+    ],
+    "basis_gates": [
+      "rz",
+      "sx",
+      "x",
+      "cx"
+    ],
+    "cx_error_sweep": [
+      0.005,
+      0.01
+    ],
+    "cx_error_main": 0.005,
+    "sq_error": 0.001,
+    "readout_error": 0.0,
+    "shots": 20000,
+    "seed": 1234,
+    "layout_modes": [
+      "naive",
+      "optimized"
+    ],
+    "routing_trials": 10
+  },
+  "quick_mode": false
+}
