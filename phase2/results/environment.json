@@ -1,0 +1,67 @@
+{
+  "python": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+  "qiskit": "1.4.6",
+  "qiskit_aer": "0.18.0",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "matplotlib": "3.11.2",
+  "pandas": "2.2.2",
+  "qff_sim_sha": "dd0305834f88164f01f9b2a17f7333eb48a966cb81951b1953eed0e218de4cfc",
+  "processor_d_sha": "95b8e1bab3dbd283e28d72626e0f41dda1c19bfa1f0013cf4f81280a9501a2c4",
+  "timestamp": "2026-10-29T16:20:23Z",
+  "RECOMPUTE": true,
+  "locked": {
+    "N": 4,
+    "J": 1.0,
+    "g": 1.0,
+    "periodic": true,
+    "ring_bonds": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        0
+      ]
+    ],
+    "init_label": "1010",
+    "T": 2.0,
+    "order": 1,
+    "steps": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    "noise_scales_D": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "noise_scales_AB": [
+      1.0
+    ],
+    "shots": 4096,
+    "opt_level": 1,
+    "p1": 0.001,
+    "p2": 0.005,
+    "p_readout": 0.01
+  }
+}

@@ -1,0 +1,7 @@
+candidate_id,name,num_qubits,max_degree,diameter,basis,n_star,fidelity_at_n_star,two_q_at_n_star,swaps_at_n_star,embed_chain_n4,embed_ring_n6,embed_ring_n8,embed_ring_n12,description
+C1,Ring-4 (RZZ),4,2,2,rz+sx+x+rzz,8,0.752817,32,0,1,inf,inf,inf,Minimal 4-qubit ring footprint
+C2,Cube-8 (RZZ),8,3,3,rz+sx+x+rzz,8,0.752817,32,0,1,1,1,inf,3D Hypercube Q3 / 4-ladder ring
+C3,HexPrism-12 (RZZ),12,3,4,rz+sx+x+rzz,8,0.752817,32,0,1,1,1,1,12-qubit hexagonal prism / 6-ladder cylinder
+C4,Grid-3x4 (RZZ),12,4,5,rz+sx+x+rzz,8,0.752817,32,0,1,1,1,1,12-qubit 3x4 2D planar mesh
+C5,Cube-8 (CX Control),8,3,3,rz+sx+x+cx,7,0.662816,56,0,1,1,1,inf,Double-ring 8q with standard CX basis
+C6,DoubleRing-8 (RZZ) [Winner D2],8,3,3,rz+sx+x+rzz,8,0.752817,32,0,1,1,1,inf,8-qubit double 4-cycle with RZZ native couplers

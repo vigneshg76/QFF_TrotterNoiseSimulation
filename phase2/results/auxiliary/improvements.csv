@@ -1,0 +1,4 @@
+construction,n_star,fidelity_at_n_star,two_q_gates,depth,two_q_depth
+1st-Order CX Control,7,0.662816,56,78,28
+1st-Order Native RZZ (D2 Official),8,0.752817,32,57,16
+Combined 2nd-Order + Native RZZ,6,0.815267,24,47,12

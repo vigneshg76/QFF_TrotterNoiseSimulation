@@ -1,0 +1,28 @@
+{
+  "name": "Processor D",
+  "team": "QFF_TrotterNoiseSimulation",
+  "problem_statement": "PS-S3",
+  "num_qubits": 8,
+  "edges": [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 0],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [3, 7],
+    [4, 5],
+    [5, 6],
+    [6, 7],
+    [7, 4]
+  ],
+  "basis_gates": ["rz", "sx", "x", "cx"],
+  "error_rates": {
+    "p1": 0.001,
+    "p2": 0.005,
+    "p_readout": 0.01
+  },
+  "justification": "The primary bottleneck measured on Processor A for the N=4 ring TFIM Trotter circuit is routing overhead: A lacks a 4-qubit cycle so SABRE inserts SWAPs (each costing 3 CX gates), inflating two-qubit gate counts and depth significantly. Processor D is designed as a double-ring (two concentric 4-cycles: 0-1-2-3-0 and 4-5-6-7-4, with spokes 0-4, 1-5, 2-6, 3-7), giving every pair of ring qubits direct connectivity at graph distance at most 2. The N=4 ring bonds (0,1),(1,2),(2,3),(3,0) embed directly onto the inner ring with zero SWAPs needed, eliminating the dominant noise source on Processor A. The design accepts the same official noise rates (p1=0.001, p2=0.005, p_readout=0.01), since lower rates are not permitted. The trade-off is using 8 qubits instead of 5 (A) to achieve the SWAP-free 4-cycle embedding, increasing physical qubit cost but substantially reducing routing-induced CX overhead and improving fidelity at all Trotter step counts."
+}
+

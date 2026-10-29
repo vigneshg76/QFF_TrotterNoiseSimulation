@@ -1,0 +1,4 @@
+processor,n_star_fidelity,fidelity_at_n_star_F,ms_error_at_n_star_F,n_star_observable,fidelity_at_n_star_Ms,ms_error_at_n_star_Ms
+Processor A,6,0.577419,0.282693,6,0.577419,0.282693
+Processor B,7,0.662816,0.211526,6,0.656538,0.20884
+Processor D,8,0.752817,0.14927,7,0.751916,0.146951

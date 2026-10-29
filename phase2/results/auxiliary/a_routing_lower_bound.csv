@@ -1,0 +1,5 @@
+metric,value,interpretation
+graph_girth,infinity (acyclic tree),Zero 4-cycles exist; 0 SWAPs mathematically impossible
+static_lower_bound,2 SWAPs per step,Exhaustive permutation search over 120 mappings proves static min is 2
+dynamic_routing_lower_bound,1 SWAP per step,Dynamic routing re-orders qubits after bond 2 to achieve 1 SWAP/step
+sabre_router_stability,1 SWAP/step (50/50 seeds),SABRE deterministically achieves the dynamic theoretical lower bound
