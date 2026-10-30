@@ -1,68 +1,10 @@
 {
   "name": "Processor D",
-  "team": "QFF_TrotterNoiseSimulation",
+  "team": "Entangled Minds",
   "problem_statement": "PS-S3",
-  "num_qubits": 8,
-  "edges": [
-    [
-      0,
-      1
-    ],
-    [
-      1,
-      2
-    ],
-    [
-      2,
-      3
-    ],
-    [
-      3,
-      0
-    ],
-    [
-      0,
-      4
-    ],
-    [
-      1,
-      5
-    ],
-    [
-      2,
-      6
-    ],
-    [
-      3,
-      7
-    ],
-    [
-      4,
-      5
-    ],
-    [
-      5,
-      6
-    ],
-    [
-      6,
-      7
-    ],
-    [
-      7,
-      4
-    ]
-  ],
-  "basis_gates": [
-    "rz",
-    "sx",
-    "x",
-    "rzz"
-  ],
-  "error_rates": {
-    "p1": 0.001,
-    "p2": 0.005,
-    "p_readout": 0.01
-  },
-  "justification": "The primary bottleneck measured on Processors A and B for the periodic N=4 TFIM Trotter simulation is two-qubit gate overhead: in standard CX basis, each Trotter step requires 8 CX gates, accounting for 78.8% of the accumulated decoherence error. Processor D directly targets this bottleneck by adopting a native RZZ two-qubit basis [rz, sx, x, rzz] on an 8-qubit double-ring topology (two concentric 4-cycles with 4 spokes, max degree 3, diameter 3). The native RZZ basis realizes exp(-i theta ZZ / 2) as a single physical gate rather than a CX-RZ-CX decomposition, halving two-qubit gate count from 8 to 4 per Trotter step and cutting two-qubit circuit depth from 4 to 2 per step. The 4-qubit target ring embeds isomorphically onto the primary 4-cycle with zero routing SWAPs. Official error rates (p1=0.001, p2=0.005, p_ro=0.01) are maintained for a rigorous, noise-matched baseline. The physical trade-off accepted is an 8-qubit architecture requiring tunable ZZ coupling hardware rather than fixed CX couplers, increasing calibration complexity while maximizing algorithmic fidelity across the NISQ Trotter volume."
+  "num_qubits": 6,
+  "edges": [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5]],
+  "basis_gates": ["rz", "sx", "x", "rzz"],
+  "error_rates": {"p1": 0.001, "p2": 0.005, "p_readout": 0.01},
+  "justification": "At the 1x fidelity optimum, Processor A needs 11 SWAPs and 33 routing two-qubit gates (81 total versus 48 logical), while Processor B embeds the ring with zero routing but needs 56 logical CX gates. Processor D uses a four-qubit cycle to remove ring routing and native RZZ gates to reduce the optimum circuit to 32 two-qubit gates at depth 57. We retain the official 0.001/0.005/0.01 rates because there is no measured evidence to claim better hardware. The accepted trade-off is assuming native RZZ has the same error rate as CX; the two-qubit tail does not help the ring, but enables a distance-4 Bell test."
 }

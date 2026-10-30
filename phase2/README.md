@@ -1,132 +1,166 @@
-# QFF 2026 Phase 2 — PS-S3: Trotter Error vs Noise
+# QFF 2026 · Phase 2
+## Quantum Simulation Track — PS-S3
 
-**Team:** QFF_TrotterNoiseSimulation  
-**Problem Statement:** PS-S3 (Trotter error versus noise: finding the best step count $n^*$)  
-**Repository:** https://github.com/vigneshg76/QFF_TrotterNoiseSimulation  
-**Primary Execution Engine:** `project/main.ipynb` (Fully executed, exit code 0)  
+**Team:** Entangled Minds
+**Challenge:** Trotter error versus noise
+**Status:** Required PS-S3 runs, shared Bell experiment, Processor D validation,
+and supplementary error analysis completed locally.
 
----
+> **Headline:** For the locked four-spin ring at \(T=2\), the best tested
+> first-order Trotter step counts by the official noisy-fidelity criterion are
+> \(n^*=6\) on A, \(7\) on B, and \(8\) on D. On D, the selected count changes
+> from 8 at 0.5× noise to 7 at 2× noise.
 
-## 1. Executive Summary & Key Results
+## Results at a glance
 
-In digital quantum simulation (DQS) of Hamiltonian dynamics on noisy intermediate-scale quantum (NISQ) processors, a fundamental tension governs simulation accuracy:
-1. **Algorithmic Discretization Error (Trotter Error):** Increasing the number of Trotter steps $n$ reduces discrete-time operator splitting error ($\epsilon_T \propto 1/n^2$ in infidelity for first-order Suzuki-Trotter).
-2. **Decoherence & Hardware Gate Noise:** Each additional Trotter step introduces a discrete layer of non-commuting two-qubit entangling gates, accumulating depolarizing error that exponentially suppresses quantum state fidelity ($F_\text{noise} \propto e^{-\lambda_\text{step} \cdot n}$).
+| Processor | Noise scale | Best tested \(n^*\) | Noisy fidelity at \(n^*\) |
+|---|---:|---:|---:|
+| A | 1× | 6 | 0.5774 |
+| B | 1× | 7 | 0.6628 |
+| D | 0.5× | 8 | 0.8415 |
+| D | 1× | 8 | 0.7528 |
+| D | 2× | 7 | 0.6207 |
 
-This competition induces a universal non-monotonic crossover peaking at an optimal step count $n^*$. This project rigorously identifies, models, and explains $n^*$ across hardware topologies (Processors A, B, and custom Processor D) and noise scales ($0.5\times, 1\times, 2\times$), under official locked benchmarks.
+These are maxima over the prescribed discrete grid, not continuous or
+hardware optima. The exact reference staggered magnetization is
+\(M_s(T=2)=0.65244\). Results use the official synthetic noise model; no
+quantum-hardware execution is claimed.
 
-### Headline Benchmark Summary (Official Locked Settings)
+## Contents
 
-| Processor | Topology | Native Basis | Physical Qubits | Noise Scale | $n^*$ (Optimal Steps) | Peak Fidelity $F(n^*)$ | Two-Qubit Gates at $n^*$ | Two-Qubit Depth | SWAPs / Step |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Processor A** | Star-Tree | CX-native | 5 | $1.0\times$ | **6** | **0.577419** | 66 CX | 33 | 1 SWAP |
-| **Processor B** | Planar Bridge | CX-native | 9 | $1.0\times$ | **7** | **0.662816** | 56 CX | 28 | 0 SWAPs |
-| **Processor D** | Double 4-Ring | **RZZ-native** | 8 | $0.5\times$ | **8** | **0.841453** | 32 RZZ | 16 | 0 SWAPs |
-| **Processor D** | Double 4-Ring | **RZZ-native** | 8 | $1.0\times$ | **8** | **0.752817** | 32 RZZ | 16 | 0 SWAPs |
-| **Processor D** | Double 4-Ring | **RZZ-native** | 8 | $2.0\times$ | **7** | **0.620712** | 28 RZZ | 14 | 0 SWAPs |
+- [Experiment](#experiment)
+- [Key findings](#key-findings)
+- [Reproduce](#reproduce)
+- [Outputs](#outputs)
+- [Limitations](#limitations)
+- [AI assistance](#ai-assistance)
 
-- **Exact Reference Observable:** Staggered Magnetization $M_s(T=2.0) = \mathbf{0.652444}$ ($|\psi_\text{exact}(T)\rangle$ via dense SciPy `expm_multiply`, norm $= 1.0000000000$).
-- **Algorithmic Error Scaling:** Log-log regression of noise-free Trotter infidelity $(1 - F_\text{trot})$ vs $n$ yields a slope of $\mathbf{-1.865}$, confirming first-order Trotter theory (asymptotic slope $-2.00$).
-- **Hardware Bottleneck & Processor D Advantage:**
-  - *Vs Processor A:* Eliminates the tree routing bottleneck (Processor A graph girth is $\infty$, requiring 1 SWAP/step, 11 CX/step), slashing two-qubit gate count and eliminating routing overhead entirely.
-  - *Vs Processor B:* Processor B natively embeds the 4-cycle but incurs 8 CX gates per step. Processor D adopts an **RZZ-native basis** (`['rz', 'sx', 'x', 'rzz']`, explicitly permitted by docx Section 6 and `tools/check_processor_d.py`), realizing each $ZZ$ bond as a single physical two-qubit gate ($4$ RZZ/step vs $8$ CX/step). This cuts two-qubit gate count and two-qubit depth by **50%**, boosting peak fidelity from $0.6628$ to $\mathbf{0.7528}$ ($+13.6\%$ relative fidelity gain, $26.7\%$ reduction in infidelity).
-- **Noise Dynamics of $n^*$:** As physical error rates double ($0.5\times \to 1.0\times \to 2.0\times$), the per-step loss coefficient $\lambda_\text{step}$ scales cleanly by $2\times$ per doubling ($0.01378 \to 0.02732 \to 0.05351$, clean $1.98\times$ and $1.96\times$). Continuous parabolic peak interpolation yields $n^*(\lambda)$ power-law scaling $\alpha = \mathbf{-0.2290 \pm 0.0113}$, consistent with non-asymptotic Trotter convergence approaching the asymptotic $\lambda^{-1/3}$ scaling.
-- **First-Principles $\lambda_\text{step}$ Prediction:** A parameter-free quantum channel calculation summing subsystem error channels predicts $\lambda_\text{step} = 0.02600$ for Processor D (vs measured $0.02732$, a 7.1% match) and $0.04300$ for Processor B (vs measured $0.04473$, a 6.5% match).
-- **Quantum Error Mitigation:**
-  - Single-qubit readout-error correction rescales raw $M_s(n^*=8)$ from $0.503174$ to $0.513443$ (32,768 calibration shots).
-  - Whole-circuit digital unitary gate folding ZNE across folds {1, 3, 5, 7} with pre-readout correction yields:
-    - Linear ZNE: $0.549460 \pm 0.010935$
-    - Richardson ZNE: $0.634135 \pm 0.035212$
-    - Zero-Asymptote Exponential ZNE: $\mathbf{0.633913 \pm 0.020965}$
-  - **Decomposition of Residual Gap:** The ideal first-order Trotter observable at $n^*=8$ is $M_s^	ext{trot}(8) = \mathbf{0.618206}$ ($M_s^	ext{exact} = 0.652444$). The total raw error decomposes into **$-0.034238$ pure Trotter algorithmic bias** and **$-0.115032$ hardware noise**. Zero-asymptote exponential ZNE recovers the expectation value within $0.75\sigma$ of the ideal Trotter target!
-  - **Mitigation-Optimal Step Count:** Scanning across the grid demonstrates that the post-ZNE observable error is minimized at **$n = 10$** ($M_s^\text{ZNE} = 0.62949$, $|M_s - M_s^\text{exact}| = \mathbf{0.0230}$), proving that error mitigation allows exploiting deeper Trotter circuits with smaller algorithmic bias.
+## Experiment
 
----
+The locked Hamiltonian is the periodic four-site TFIM
+\[
+H=-J\sum_{i=0}^{3}Z_iZ_{(i+1)\bmod 4}-g\sum_{i=0}^{3}X_i,
+\qquad J=g=1,
+\]
+initialized in the Néel state `1010` and evolved to \(T=2\) by first-order
+Trotterization. The required step grid is
+`1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16`.
 
-## 2. Repository Architecture
+The official comparison reports density-matrix fidelity against the exact
+state, \(M_s\) from 4,096 noisy shots, and logical versus routing two-qubit
+gates. D is also tested at 0.5× and 2× noise. Required settings are kept
+unchanged: A/B use the official `rz/sx/x/cx` basis, D uses its approved
+`rz/sx/x/rzz` basis, \(p_1=0.001\), \(p_2=0.005\), readout bit-flip
+probability 0.01, seed 42, and optimization level 1. The organizer-provided
+[`qff_sim.py`](./qff_sim.py) is unchanged.
 
-```
-project/
-├── README.md                          # Executive summary, benchmark table, run instructions
-├── main.ipynb                         # Standalone executable notebook (N0–N14, fully executed)
-├── requirements.txt                   # Official pinned dependencies
-├── qff_sim.py                         # Organizer starter module (verifiably unchanged)
-├── processors/
-│   └── processor_D.json               # Frozen custom hardware design (passes checker)
-├── data/
-│   └── s3/
-│       └── tfim_ring_N4_g1.00.json    # Locked TFIM ring Hamiltonian specification
-├── tools/
-│   └── check_processor_d.py           # Official Processor D design rule verification script
-├── templates/
-│   └── results_columns.md             # Required CSV column and schema specifications
-├── results/
-│   ├── environment.json               # Environment metadata, SHA-256 hashes, locked parameters
-│   ├── report_numbers.json            # Exact measured values consumed by report.md
-│   ├── figures/                       # High-resolution benchmark figures
-│   │   ├── processor_D.png            # Coupling graph of custom Processor D (Double 4-Ring)
-│   │   ├── s3_crossover.png           # Multi-panel F(n) crossover curves with model fits
-│   │   ├── s3_noise_sweep.png         # Noise scale sweep (0.5×, 1×, 2×) on Processor D
-│   │   └── s3_gate_split.png          # Stacked gate breakdown (logical vs routing)
-│   ├── tables/                        # All 7 official benchmark output tables
-│   │   ├── bell.csv                   # Objective 1: Bell-state verification on Processor D
-│   │   ├── resources.csv              # Resource comparison at n* and n=16 across A, B, D
-│   │   ├── s3_scan.csv                # Full step scan data across processors & scales
-│   │   ├── s3_summary.csv             # Measured n* and peak fidelity values
-│   │   ├── s3_noise_sweep.csv         # Processor D noise scale sweep data
-│   │   ├── s3_gate_split.csv          # Comprehensive gate and depth metrics vs n
-│   │   └── mitigation.csv             # Bonus: Error mitigation benchmark
-│   ├── auxiliary/                           # Exploratory & audit studies (Tasks T1–T8)
-│   │   ├── processor_D_v1.json        # Archived v1 Processor D design (CX control)
-│   │   ├── d_design_search.csv        # Comprehensive candidate evaluation (C1–C6)
-│   │   ├── d_ablation.csv             # 2×2 ablation: Topology (Tree/Ring) × Basis (CX/RZZ)
-│   │   ├── a_routing_lower_bound.csv  # Graph theory & exhaustive search (girth infinity)
-│   │   ├── a_routing_sensitivity.csv  # 50-seed sensitivity proving 0 router variance
-│   │   ├── first_principles_lambda.csv# Theoretical vs empirical decoherence rates
-│   │   ├── noise_scaling.csv          # 5-scale power-law regression with parabolic peak fit
-│   │   ├── bottleneck.csv             # Measured noise channel breakdown (2Q, 1Q, readout)
-│   │   ├── improvements.csv           # Measured 2nd-order Suzuki & native RZZ compilation
-│   │   ├── mitigation_extended.csv    # Trotter bias vs hardware noise decomposition
-│   │   ├── mitigation_optimal_n.csv   # Observable error vs step count post-ZNE
-│   │   └── observable_optimal.csv     # State-fidelity n*(F) vs observable n*(Ms)
-│   └── cache/                         # Intermediate simulation cache (RECOMPUTE flag support)
-├── phase1_archive/                    # Archived Phase 1 artifacts
-└── report.md                          # Comprehensive technical report (<= 8 pages)
-```
+The separate, clearly labeled time-resolved analysis samples nine times in
+\([0,2]\) and decomposes staggered-magnetization error into ideal Trotter,
+noise-induced, and total errors. It uses deterministic density-matrix
+expectations with readout excluded. Its observable-RMSE optimum is a
+supplementary metric and does **not** replace the official \(n^*\), which is
+defined by the required noisy state fidelity at \(T=2\).
 
----
+## Key findings
 
-## 3. How to Run & Reproducibility Guarantee
+- At each 1× fidelity optimum, A uses 81 two-qubit gates (48 logical plus
+  33 routing), B uses 56 with no routing, and D uses 32 with no routing.
+- D's ring connectivity avoids the routing overhead measured on A; its
+  native RZZ basis also lowers the logical two-qubit count. This conclusion
+  depends on the assumed RZZ error rate matching the official CX rate.
+- The exact result is calculated from the locked challenge operator, which
+  the pipeline checks against the organizer's Hamiltonian builder.
+- The report distinguishes noisy fidelity from the shot-based observable
+  and documents the assumptions, uncertainty, mitigation cost, and limits.
 
-### Prerequisites
-A Python virtual environment running Python 3.11, 3.12, or 3.13:
-```bash
-python -m venv sim-env
-# Activate on Windows:
-sim-env\Scripts\activate
-# Activate on Linux/macOS:
-source sim-env/bin/activate
+See the [judge-facing report](./report.md) for the Bell-state table, D design
+justification, measured resources, figures, error analysis, and discussion.
 
-pip install -r requirements.txt
+### Supplementary observable-RMSE check
+
+The additional nine-time-point \(M_s\) analysis selects a different optimum
+because it minimizes a different metric. It is not a replacement for the
+official fidelity-based \(n^*\).
+
+| Processor / noise | Lowest-\(M_s\)-RMSE steps | \(M_s\) RMSE |
+|---|---:|---:|
+| D / no noise | 16 | 0.00487 |
+| D / 0.5× | 8 | 0.06049 |
+| D / 1× | 6 | 0.09482 |
+| D / 2× | 5 | 0.14492 |
+
+This plot is based on \(M_s\) RMSE over nine times, a different objective
+from the official fidelity-at-\(T=2\) benchmark.
+
+![Supplementary total observable RMSE versus step count and noise](results/figures/s3_total_error_vs_steps_noise.png)
+
+## Reproduce
+
+Tested with Python 3.12.10 on Windows 11.
+
+### Windows PowerShell
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m jupyter notebook
 ```
 
-### Reproducing All Results
-The notebook is self-contained and reproducible. To execute top-to-bottom:
-```bash
-jupyter nbconvert --to notebook --execute main.ipynb --output main_executed.ipynb
-# Or via python module:
-python -m jupyter nbconvert --to notebook --execute main.ipynb --output main_executed.ipynb
+Open `main.ipynb`, then choose **Kernel → Restart Kernel and Run All Cells**.
+The notebook recomputes the official scan and supplementary analysis,
+regenerates the figures, and writes the environment record.
+
+To run without opening Jupyter:
+
+```powershell
+python s3_pipeline.py
 ```
-- **Execution Time:** ~30–40 seconds with `RECOMPUTE = True` (fresh density-matrix calculations, candidate search, exhaustive permutation search, and 4096-shot Aer simulations from scratch).
-- **Strict Verification:** Cell N14 executes assertions verifying that every output table exists, conforms strictly to `templates/results_columns.md`, and that all locked Hamiltonian parameters and seeds are preserved.
 
----
+After a complete run has saved the scan and resources, `RECOMPUTE = False`
+in the notebook can reuse those two files; keep it `True` if results are
+missing or stale. A fresh setup should install the pinned packages from
+[`requirements.txt`](./requirements.txt).
 
-## 4. AI Tool Use Declaration
+Run the focused correctness checks with:
 
-In accordance with competition rules, this project declares the use of the following AI tools during development:
-- **Antigravity (Google DeepMind):** Primary agentic AI coding environment and pair programmer for implementing the simulation pipeline, refactoring notebook cells N0–N14, automating QA assertions, verifying CSV schema compliance, and formatting documentation.
-- **Claude (Anthropic):** Architectural planning, theoretical derivation and sanity checking of the non-asymptotic Trotter crossover model, and critical review of error mitigation and hardware trade-offs.
-- **GitHub Copilot (Microsoft / OpenAI):** Code scaffolding, boilerplate completion, and exploratory scripting during initial Phase 1 development.
+```powershell
+python -m unittest discover -s tests -v
+```
 
-All physical models, Hamiltonians, initial states, boundary conditions, noise scales, Trotter ordering conventions, and transpiler pass manager settings strictly adhere to the organizer's locked specification (`qff_sim.py`, `instances_index.json`, `results_columns.md`). All benchmark numbers are produced by clean local execution without fabrication.
+## Outputs
+
+| Path | Contents |
+|---|---|
+| [`main.ipynb`](./main.ipynb) | End-to-end reproducible notebook |
+| [`s3_pipeline.py`](./s3_pipeline.py) | Official benchmark orchestration and supplementary analysis |
+| [`processors/processor_D.json`](./processors/processor_D.json) | Validated six-qubit ring-plus-tail proposal |
+| [`data/s3/`](./data/s3/) | Locked PS-S3 operator |
+| [`results/tables/`](./results/tables/) | Required benchmark tables and supplementary raw/summary error tables |
+| [`results/figures/`](./results/figures/) | Required figures plus time-resolved error and resource plots |
+| [`results/environment.json`](./results/environment.json) | Runtime and official benchmark settings |
+| [`report.md`](./report.md) | Full results, interpretation, and limitations |
+| [`tests/`](./tests/) | Focused exact-reference and density-matrix checks |
+
+The required tables are `s3_scan.csv`, `s3_summary.csv`, `resources.csv`,
+and `bell.csv`. `mitigation.csv` records the optional readout-correction
+bonus. Supplementary results are `s3_error_analysis.csv` and
+`s3_error_summary.csv` ([raw time-series](./results/tables/s3_error_analysis.csv),
+[RMSE summary](./results/tables/s3_error_summary.csv)).
+
+## Limitations
+
+This is a four-spin, one-Hamiltonian, one-time, first-order Trotter study
+under a synthetic simulator noise model. Processor D is a proposal, not
+hardware. The results do not establish a universal best step count or real
+device performance; the RZZ-versus-CX comparison assumes identical official
+per-gate error rates.
+
+## AI assistance
+
+GitHub Copilot was used in this final audit, for a targeted progress-log fix,
+and to prepare this README and report. The reported results were generated
+by running the project pipeline and checked against the challenge table
+schemas and Processor D rules. Any AI tools used earlier in project
+development must also be disclosed by the team before submission; this
+statement does not claim that no other tools were used.

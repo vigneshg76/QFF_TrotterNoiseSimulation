@@ -1,11 +1,4 @@
+results_quick/
 __pycache__/
+.venv/
 .ipynb_checkpoints/
-results/cache/
-*.pyc
-.env
-sim-env/
-test_env/
-*venv*/
-*_executed.ipynb
-
-

@@ -1,5 +1,2 @@
 method,ms_raw,ms_mitigated,extra_shots
-readout_correction,0.503174,0.513443,32768
-zne_linear,0.503174,0.54946,12288
-zne_richardson,0.503174,0.634135,12288
-zne_exponential,0.503174,0.633913,12288
+readout correction (symmetric-flip calibration),0.503173828125,0.5116683217477657,4096
