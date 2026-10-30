@@ -1,8 +1,8 @@
 # QFF 2026 · Phase 2
 ## Quantum Simulation Track — PS-S3
 
-**Team:** Entangled Minds
-**Challenge:** Trotter error versus noise
+**Team:** Entangled Minds  
+**Challenge:** Trotter error versus noise  
 **Status:** Required PS-S3 runs, shared Bell experiment, Processor D validation,
 and supplementary error analysis completed locally.
 
